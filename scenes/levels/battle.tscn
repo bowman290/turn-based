@@ -1,0 +1,154 @@
+[gd_scene format=4 uid="uid://bpqxql2xq3gle"]
+
+[ext_resource type="Texture2D" uid="uid://b3x58tqsfk84i" path="res://assets/battle/tile_placeholder.png" id="1_el1q8"]
+[ext_resource type="Script" uid="uid://c2jn6u63l36ru" path="res://scripts/battle/battle.gd" id="2_qanq6"]
+[ext_resource type="PackedScene" uid="uid://em3g6dwjroei" path="res://scenes/players/enemy.tscn" id="3_1b7gj"]
+[ext_resource type="PackedScene" uid="uid://nguhmct08dm" path="res://scenes/players/player.tscn" id="3_e4qoq"]
+[ext_resource type="Texture2D" uid="uid://cgntvapl15ift" path="res://assets/battle/tile_placeholder_alt.png" id="3_fe5fq"]
+[ext_resource type="Script" uid="uid://dh1y5glf53m7n" path="res://scripts/battle/state_machine.gd" id="4_smgd"]
+[ext_resource type="Script" uid="uid://xahs7caaf0oj" path="res://scripts/battle/states/player_idle.gd" id="5_idle"]
+[ext_resource type="Script" uid="uid://cycxgi2xts1h" path="res://scripts/battle/states/player_moving.gd" id="6_move"]
+[ext_resource type="Script" uid="uid://tjvvqkoijul0" path="res://scripts/battle/states/enemy_turn.gd" id="7_eturn"]
+[ext_resource type="Script" uid="uid://d3c7k8ivf3x20" path="res://scripts/battle/states/player_attacking.gd" id="10_agy47"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_qanq6"]
+texture = ExtResource("1_el1q8")
+texture_region_size = Vector2i(64, 32)
+0:1/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_hfvrr"]
+texture = ExtResource("3_fe5fq")
+texture_region_size = Vector2i(64, 32)
+0:0/0 = 0
+0:1/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_el1q8"]
+tile_shape = 1
+tile_size = Vector2i(64, 32)
+sources/1 = SubResource("TileSetAtlasSource_qanq6")
+sources/2 = SubResource("TileSetAtlasSource_hfvrr")
+
+[node name="battle" type="Node2D" unique_id=1254834923]
+y_sort_enabled = true
+script = ExtResource("2_qanq6")
+
+[node name="GridTiles" type="TileMapLayer" parent="." unique_id=302269351]
+tile_map_data = PackedByteArray("AAD//wEAAgAAAAAAAAD//wAAAQAAAAEAAAD+////AgAAAAAAAAD///7/AQAAAAEAAAD/////AQAAAAEAAAAAAAAAAQAAAAEAAAAAAP//AgAAAAAAAAAAAP7/AQAAAAEAAAD///3/AgAAAAAAAAA=")
+tile_set = SubResource("TileSet_el1q8")
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1784599195]
+zoom = Vector2(3, 3)
+
+[node name="Enemy" parent="." unique_id=317662358 instance=ExtResource("3_1b7gj")]
+position = Vector2(0, -47)
+
+[node name="Player" parent="." unique_id=645152690 instance=ExtResource("3_e4qoq")]
+script = null
+
+[node name="PlayerStateMachine" type="Node" parent="." unique_id=567891234]
+script = ExtResource("4_smgd")
+
+[node name="PlayerIdle" type="Node" parent="PlayerStateMachine" unique_id=234567891 node_paths=PackedStringArray("battle", "state_machine")]
+script = ExtResource("5_idle")
+battle = NodePath("../..")
+state_machine = NodePath("..")
+
+[node name="PlayerMoving" type="Node" parent="PlayerStateMachine" unique_id=891234567 node_paths=PackedStringArray("battle", "state_machine")]
+script = ExtResource("6_move")
+battle = NodePath("../..")
+state_machine = NodePath("..")
+
+[node name="EnemyTurn" type="Node" parent="PlayerStateMachine" unique_id=345678912 node_paths=PackedStringArray("battle", "state_machine")]
+script = ExtResource("7_eturn")
+battle = NodePath("../..")
+state_machine = NodePath("..")
+
+[node name="PlayerAttacking" type="Node" parent="PlayerStateMachine" unique_id=141653443 node_paths=PackedStringArray("battle", "state_machine")]
+script = ExtResource("10_agy47")
+battle = NodePath("../..")
+state_machine = NodePath("..")
+
+[node name="PlayerTargetting" type="Node" parent="PlayerStateMachine" unique_id=673821373]
+
+[node name="UI" type="CanvasLayer" parent="." unique_id=84154078]
+
+[node name="CombatUI" type="Control" parent="UI" unique_id=1217927183]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="PlayerHealth" type="ProgressBar" parent="UI/CombatUI" unique_id=2128842006]
+layout_mode = 1
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 220.0
+offset_bottom = 50.0
+value = 100.0
+
+[node name="EnemyHealth" type="ProgressBar" parent="UI/CombatUI" unique_id=1197459643]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -220.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = 50.0
+grow_horizontal = 0
+value = 100.0
+
+[node name="TurnLabel" type="Label" parent="UI/CombatUI" unique_id=776339002]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -38.5
+offset_top = -23.0
+offset_right = 38.5
+grow_horizontal = 2
+grow_vertical = 0
+text = "Your Turn"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="EndTurnBtn" type="Button" parent="UI/CombatUI" unique_id=278486628]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -50.0
+offset_right = 150.0
+grow_vertical = 0
+text = "End Turn"
+
+[node name="AttackBtn" type="Button" parent="UI/CombatUI" unique_id=1872816423]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -110.0
+offset_right = 150.0
+offset_bottom = -60.0
+grow_vertical = 0
+text = "Melee Attack"
+
+[node name="PlayerMovesLabel" type="Label" parent="UI/CombatUI" unique_id=1612976128]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -40.0
+offset_top = -23.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[connection signal="pressed" from="UI/CombatUI/EndTurnBtn" to="." method="_on_end_turn_btn_pressed"]
+[connection signal="pressed" from="UI/CombatUI/AttackBtn" to="." method="_on_attack_btn_pressed"]

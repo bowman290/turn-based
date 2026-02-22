@@ -1,0 +1,14 @@
+class_name BaseState
+extends Node
+
+@export var battle: Node
+@export var state_machine: Node
+
+func enter() -> void:
+	pass
+
+func exit() -> void:
+	pass
+
+func handle_input(_event: InputEvent) -> void:
+	pass
