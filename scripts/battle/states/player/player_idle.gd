@@ -1,4 +1,4 @@
-extends "res://scripts/battle/states/base_state.gd"
+extends PlayerBaseState
 
 func enter() -> void:
 	battle.update_turn_label("Player Turn")
@@ -13,7 +13,7 @@ func handle_input(event: InputEvent) -> void:
 			return
 	
 		if grid_pos == battle.enemy_grid_pos:
-			_try_attack()
+			player_state_machine.transition_to(player_state_machine.player_targetting)
 		else:
 			_try_move(grid_pos)
 
@@ -23,7 +23,7 @@ func _try_attack() -> void:
 	if battle.player_has_attacked:
 		return
 	#change to attack state	
-	state_machine.transition_to(state_machine.player_attacking)
+	player_state_machine.transition_to(player_state_machine.player_attacking)
 	
 
 func _try_move(grid_pos: Vector2i) -> void:
@@ -33,5 +33,5 @@ func _try_move(grid_pos: Vector2i) -> void:
 	if not battle.is_adjacent_space(battle.player_grid_pos, grid_pos):
 		print("Can only move to adjacent tiles")
 		return
-	state_machine.player_moving.target_grid_pos = grid_pos
-	state_machine.transition_to(state_machine.player_moving)
+	player_state_machine.player_moving.target_grid_pos = grid_pos
+	player_state_machine.transition_to(player_state_machine.player_moving)

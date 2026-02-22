@@ -3,7 +3,8 @@ extends Node2D
 @onready var grid_tiles = $GridTiles
 @onready var player = $Player
 @onready var enemy = $Enemy
-@onready var state_machine = $PlayerStateMachine
+@onready var player_state_machine = $PlayerStateMachine
+@onready var battle_state_machine = $BattleStateMachine
 
 @export var max_player_health: int = 100
 @export var max_enemy_health: int = 100
@@ -36,13 +37,13 @@ func _ready() -> void:
 	update_health(enemy_health_bar, enemy_health)
 	moves_label.text = "Moves Left " + str(player_moves)
 
-	state_machine.transition_to(state_machine.player_idle)
+	battle_state_machine.transition_to(battle_state_machine.player_turn)
 
 func _unhandled_input(event: InputEvent) -> void:
-	state_machine.handle_input(event)
+	player_state_machine.handle_input(event)
 
 func end_turn() -> void:
-	state_machine.transition_to(state_machine.enemy_turn)
+	player_state_machine.turn_ended.emit()
 
 func subtract_moves(moves: int) -> void:
 	player_moves -= moves
@@ -63,8 +64,6 @@ func update_player_position() -> void:
 
 func update_enemy_position() -> void:
 	enemy.position = grid_tiles.map_to_local(enemy_grid_pos)
-
-
 
 func update_target_highlights() -> void:
 	var enemy_targetable = is_adjacent_space(player_grid_pos, enemy_grid_pos) and !player_has_attacked and enemy_health > 0

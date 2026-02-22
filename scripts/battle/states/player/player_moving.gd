@@ -1,4 +1,4 @@
-extends "res://scripts/battle/states/base_state.gd"
+extends PlayerBaseState
 
 var target_grid_pos: Vector2i
 
@@ -11,4 +11,4 @@ func enter() -> void:
 
 func _on_move_finished() -> void:
 	battle.subtract_moves(1)
-	state_machine.transition_to(state_machine.player_idle)
+	player_state_machine.transition_to(player_state_machine.player_idle)

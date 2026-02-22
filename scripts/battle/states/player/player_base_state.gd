@@ -1,8 +1,8 @@
-class_name BaseState
+class_name PlayerBaseState
 extends Node
 
 @export var battle: Node
-@export var state_machine: Node
+@export var player_state_machine: Node
 
 func enter() -> void:
 	pass

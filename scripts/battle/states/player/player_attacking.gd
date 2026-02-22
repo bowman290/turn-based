@@ -1,4 +1,4 @@
-extends "res://scripts/battle/states/base_state.gd"
+extends PlayerBaseState
 
 var target_grid_pos: Vector2i
 

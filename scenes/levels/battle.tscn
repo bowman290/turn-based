@@ -5,11 +5,14 @@
 [ext_resource type="PackedScene" uid="uid://em3g6dwjroei" path="res://scenes/players/enemy.tscn" id="3_1b7gj"]
 [ext_resource type="PackedScene" uid="uid://nguhmct08dm" path="res://scenes/players/player.tscn" id="3_e4qoq"]
 [ext_resource type="Texture2D" uid="uid://cgntvapl15ift" path="res://assets/battle/tile_placeholder_alt.png" id="3_fe5fq"]
-[ext_resource type="Script" uid="uid://dh1y5glf53m7n" path="res://scripts/battle/state_machine.gd" id="4_smgd"]
-[ext_resource type="Script" uid="uid://xahs7caaf0oj" path="res://scripts/battle/states/player_idle.gd" id="5_idle"]
-[ext_resource type="Script" uid="uid://cycxgi2xts1h" path="res://scripts/battle/states/player_moving.gd" id="6_move"]
-[ext_resource type="Script" uid="uid://tjvvqkoijul0" path="res://scripts/battle/states/enemy_turn.gd" id="7_eturn"]
-[ext_resource type="Script" uid="uid://d3c7k8ivf3x20" path="res://scripts/battle/states/player_attacking.gd" id="10_agy47"]
+[ext_resource type="Script" uid="uid://dh1y5glf53m7n" path="res://scripts/battle/states/player/player_state_machine.gd" id="4_smgd"]
+[ext_resource type="Script" uid="uid://xahs7caaf0oj" path="res://scripts/battle/states/player/player_idle.gd" id="5_idle"]
+[ext_resource type="Script" uid="uid://cycxgi2xts1h" path="res://scripts/battle/states/player/player_moving.gd" id="6_move"]
+[ext_resource type="Script" uid="uid://tjvvqkoijul0" path="res://scripts/battle/states/battle/enemy_turn.gd" id="7_eturn"]
+[ext_resource type="Script" uid="uid://d3c7k8ivf3x20" path="res://scripts/battle/states/player/player_attacking.gd" id="10_agy47"]
+[ext_resource type="Script" uid="uid://cn0ix8vmgicsf" path="res://scripts/battle/states/player/player_targetting.gd" id="11_hvj0s"]
+[ext_resource type="Script" uid="uid://c1pcupl63noin" path="res://scripts/battle/states/battle/battle_state_machine.gd" id="11_xrcln"]
+[ext_resource type="Script" uid="uid://dcsmjpfg62jut" path="res://scripts/battle/states/battle/player_turn.gd" id="13_k3iqn"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_qanq6"]
 texture = ExtResource("1_el1q8")
@@ -48,27 +51,38 @@ script = null
 [node name="PlayerStateMachine" type="Node" parent="." unique_id=567891234]
 script = ExtResource("4_smgd")
 
-[node name="PlayerIdle" type="Node" parent="PlayerStateMachine" unique_id=234567891 node_paths=PackedStringArray("battle", "state_machine")]
+[node name="PlayerIdle" type="Node" parent="PlayerStateMachine" unique_id=234567891 node_paths=PackedStringArray("battle", "player_state_machine")]
 script = ExtResource("5_idle")
 battle = NodePath("../..")
-state_machine = NodePath("..")
+player_state_machine = NodePath("..")
 
-[node name="PlayerMoving" type="Node" parent="PlayerStateMachine" unique_id=891234567 node_paths=PackedStringArray("battle", "state_machine")]
+[node name="PlayerMoving" type="Node" parent="PlayerStateMachine" unique_id=891234567 node_paths=PackedStringArray("battle", "player_state_machine")]
 script = ExtResource("6_move")
 battle = NodePath("../..")
-state_machine = NodePath("..")
+player_state_machine = NodePath("..")
 
-[node name="EnemyTurn" type="Node" parent="PlayerStateMachine" unique_id=345678912 node_paths=PackedStringArray("battle", "state_machine")]
-script = ExtResource("7_eturn")
-battle = NodePath("../..")
-state_machine = NodePath("..")
-
-[node name="PlayerAttacking" type="Node" parent="PlayerStateMachine" unique_id=141653443 node_paths=PackedStringArray("battle", "state_machine")]
+[node name="PlayerAttacking" type="Node" parent="PlayerStateMachine" unique_id=141653443 node_paths=PackedStringArray("battle", "player_state_machine")]
 script = ExtResource("10_agy47")
 battle = NodePath("../..")
-state_machine = NodePath("..")
+player_state_machine = NodePath("..")
 
-[node name="PlayerTargetting" type="Node" parent="PlayerStateMachine" unique_id=673821373]
+[node name="PlayerTargetting" type="Node" parent="PlayerStateMachine" unique_id=673821373 node_paths=PackedStringArray("battle", "player_state_machine")]
+script = ExtResource("11_hvj0s")
+battle = NodePath("../..")
+player_state_machine = NodePath("..")
+
+[node name="BattleStateMachine" type="Node" parent="." unique_id=359647719]
+script = ExtResource("11_xrcln")
+
+[node name="EnemyTurn" type="Node" parent="BattleStateMachine" unique_id=345678912 node_paths=PackedStringArray("battle", "battle_state_machine")]
+script = ExtResource("7_eturn")
+battle = NodePath("../..")
+battle_state_machine = NodePath("..")
+
+[node name="PlayerTurn" type="Node" parent="BattleStateMachine" unique_id=534625213 node_paths=PackedStringArray("battle", "battle_state_machine")]
+script = ExtResource("13_k3iqn")
+battle = NodePath("../..")
+battle_state_machine = NodePath("..")
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=84154078]
 
