@@ -22,54 +22,99 @@ The main scene is `scenes/levels/battle.tscn` which is set as the main scene in 
 ```
 scripts/
   battle/
-    battle.gd             # Main battle scene controller (data + shared utilities)
-    state_machine.gd      # Manages state transitions and delegates input to current state
+    battle.gd                         # Main battle scene controller (data + shared utilities)
     states/
-      base_state.gd       # Base class all states extend; sets battle/state_machine refs in _ready()
-      player_idle.gd      # Waiting for player input; routes clicks to move or attack
-      player_moving.gd    # Tween animation playing; ignores input until complete
-      enemy_turn.gd       # Enemy acting; resets player resources then returns to PlayerIdle
+      battle/
+        battle_base_state.gd          # Base class for battle states; exports battle + battle_state_machine
+        battle_state_machine.gd       # Manages turn flow (PlayerTurn / EnemyTurn)
+        player_turn.gd                # Active during player's turn; connects to turn_ended signal
+        enemy_turn.gd                 # Enemy acting; waits 1s then returns to PlayerTurn
+      player/
+        player_base_state.gd          # Base class for player states; exports battle + player_state_machine
+        player_state_machine.gd       # Manages player actions; emits turn_ended signal
+        player_idle.gd                # Waiting for input; routes clicks to move, attack, or target
+        player_moving.gd              # Tween animation playing; ignores input until complete
+        player_attacking.gd           # Handles melee attack flow
+        player_targetting.gd          # Player is selecting a target
 
 scenes/
-  levels/battle.tscn      # Main battle scene with tilemap, UI, and combat setup
+  levels/battle.tscn                  # Main battle scene with tilemap, UI, and combat setup
   players/
-    player.tscn           # Player character scene
-    enemy.tscn            # Enemy character scene
+    player.tscn                       # Player character scene
+    enemy.tscn                        # Enemy character scene
 
 assets/
-  battle/                 # Tile sprites for isometric grid
-  sprite_sheets/          # Character sprites
+  battle/                             # Tile sprites for isometric grid
+  sprite_sheets/                      # Character sprites
 ```
 
 ## Core Architecture
 
 ### Battle System (scripts/battle/battle.gd)
 
-`battle.gd` is the data owner and utility layer. It does not contain turn or input logic directly — that lives in the state machine. It manages:
+`battle.gd` is the data owner and utility layer. It does not contain turn or input logic — that lives in the state machines. It manages:
 
 1. **Shared State**: Player/enemy grid positions, health, moves remaining, attack flag
 2. **Grid Helpers**: Conversion between grid coordinates (Vector2i) and world positions
 3. **UI Updates**: Health bars, turn label, moves label, target highlights
 4. **Combat Utilities**: `melee_attack()`, `is_adjacent_space()`, `edge_distance()`
-5. **Input Entry Point**: `_unhandled_input` validates the clicked tile then delegates to `state_machine.handle_click(grid_pos)`
+5. **Input Entry Point**: `_unhandled_input` forwards raw input to `player_state_machine.handle_input(event)`
+6. **Turn End**: `end_turn()` emits `player_state_machine.turn_ended` signal
 
-### State Machine (scripts/battle/state_machine.gd)
+### Two State Machines
 
-Holds a reference to `current_state` and exposes two methods:
-- `transition_to(new_state)` — calls `exit()` on the old state, `enter()` on the new
-- `handle_click(grid_pos)` — forwards the click to `current_state.handle_click()`
+The architecture uses two separate state machines with distinct responsibilities:
 
-States are child nodes of `StateMachine` in the scene tree. Each state sets its own `battle` and `state_machine` references via `get_parent()` in `base_state._ready()`.
+**BattleStateMachine** — owns the turn flow
+- Lives at `$BattleStateMachine` in the scene
+- States: `PlayerTurn`, `EnemyTurn`
+- `battle._ready()` starts it in `PlayerTurn`
 
-### States
+**PlayerStateMachine** — owns what the player can do on their turn
+- Lives at `$PlayerStateMachine` in the scene
+- States: `PlayerIdle`, `PlayerMoving`, `PlayerAttacking`, `PlayerTargetting`
+- Activated by `PlayerTurn.enter()`
+- Emits `turn_ended` signal when the player's turn should end
 
-| State | Enter behaviour | Click behaviour |
-|---|---|---|
-| `PlayerIdle` | Updates turn label and target highlights | Routes to `_try_move` or `_try_attack` |
-| `PlayerMoving` | Starts movement tween; transitions to `PlayerIdle` on finish | Ignored |
-| `EnemyTurn` | Resets moves/attack flag, waits 1s, transitions to `PlayerIdle` | Ignored |
+### Turn End Signal Flow
 
-To add a new state: create a script extending `base_state.gd`, add a Node child to `StateMachine` in the scene, implement `enter()`, `exit()`, and `handle_click()`.
+The two machines communicate via a signal rather than direct calls, keeping them decoupled:
+
+```
+Player presses End Turn
+  → battle.end_turn() emits player_state_machine.turn_ended
+
+PlayerTurn (connected to turn_ended in enter(), disconnected in exit())
+  → _on_turn_ended() fires
+  → battle_state_machine.transition_to(enemy_turn)
+
+EnemyTurn.enter()
+  → waits 1 second
+  → battle_state_machine.transition_to(player_turn)
+
+PlayerTurn.enter()
+  → connects to turn_ended again
+  → player_state_machine.transition_to(player_idle)
+```
+
+Any player state can end the turn by emitting `player_state_machine.turn_ended` — for example when the player runs out of moves — without needing to know about `BattleStateMachine`.
+
+### State Base Classes
+
+Each state machine has its own base class:
+
+- `BattleBaseState` — exports `battle: Node` and `battle_state_machine: Node`
+- `PlayerBaseState` — exports `battle: Node` and `player_state_machine: Node`
+
+References are assigned as NodePaths in the Godot editor Inspector and stored in `battle.tscn`. All states extend their respective base class.
+
+### Adding a New State
+
+1. Create a script extending `BattleBaseState` or `PlayerBaseState`
+2. Add a Node child to the relevant state machine in the scene
+3. Assign `battle` and the state machine reference in the Inspector
+4. Implement `enter()`, `exit()`, and `handle_input(event)`
+5. Add an `@onready` var for it in the state machine script
 
 ### Coordinate System
 
@@ -95,5 +140,6 @@ Both are `CharacterBody2D` scenes. The player script is currently minimal. They 
 ## Current State & Known Gaps
 
 - Enemy AI is a placeholder (just waits 1 second)
+- `player_attacking.gd` and `player_targetting.gd` are stubs
 - `edge_distance()` is defined but not yet used for combat range checks
 - `_on_attack_btn_pressed()` in battle.gd is a stub
