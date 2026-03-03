@@ -141,7 +141,7 @@ offset_right = 150.0
 grow_vertical = 0
 text = "End Turn"
 
-[node name="AttackBtn" type="Button" parent="UI/CombatUI" unique_id=1872816423]
+[node name="MeleeAttackBtn" type="Button" parent="UI/CombatUI" unique_id=1872816423]
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
@@ -151,6 +151,17 @@ offset_right = 150.0
 offset_bottom = -60.0
 grow_vertical = 0
 text = "Melee Attack"
+
+[node name="RangedAttackBtn" type="Button" parent="UI/CombatUI" unique_id=1911706327]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -171.0
+offset_right = 150.0
+offset_bottom = -121.0
+grow_vertical = 0
+text = "Ranged Attack"
 
 [node name="PlayerMovesLabel" type="Label" parent="UI/CombatUI" unique_id=1612976128]
 layout_mode = 1
@@ -165,4 +176,5 @@ grow_horizontal = 0
 grow_vertical = 0
 
 [connection signal="pressed" from="UI/CombatUI/EndTurnBtn" to="." method="_on_end_turn_btn_pressed"]
-[connection signal="pressed" from="UI/CombatUI/AttackBtn" to="." method="_on_attack_btn_pressed"]
+[connection signal="pressed" from="UI/CombatUI/MeleeAttackBtn" to="." method="_on_melee_attack_btn_pressed"]
+[connection signal="pressed" from="UI/CombatUI/RangedAttackBtn" to="." method="_on_ranged_attack_btn_pressed"]

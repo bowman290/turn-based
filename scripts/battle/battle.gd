@@ -26,6 +26,9 @@ var player_moves: int
 var player_has_attacked: bool = false
 var target_tween: Tween = null
 
+enum attackTypes {MELEE, RANGED}
+var playerSelectedAttack : int
+
 func _ready() -> void:
 	player_health = max_player_health
 	enemy_health = max_enemy_health
@@ -99,5 +102,11 @@ func edge_distance(pos1: Vector2i, pos2: Vector2i) -> int:
 func _on_end_turn_btn_pressed() -> void:
 	end_turn()
 
-func _on_attack_btn_pressed() -> void:
-	print('target')
+
+func _on_melee_attack_btn_pressed() -> void:
+	playerSelectedAttack = attackTypes.MELEE
+	player_state_machine.transition_to(player_state_machine.player_targetting)
+
+func _on_ranged_attack_btn_pressed() -> void:
+	playerSelectedAttack = attackTypes.RANGED
+	player_state_machine.transition_to(player_state_machine.player_targetting)

@@ -2,7 +2,6 @@ extends PlayerBaseState
 
 func enter() -> void:
 	battle.update_turn_label("Player Turn")
-	battle.update_target_highlights()
 
 func handle_input(event: InputEvent) -> void:
 	
@@ -16,15 +15,6 @@ func handle_input(event: InputEvent) -> void:
 			player_state_machine.transition_to(player_state_machine.player_targetting)
 		else:
 			_try_move(grid_pos)
-
-func _try_attack() -> void:
-	if not battle.is_adjacent_space(battle.player_grid_pos, battle.enemy_grid_pos):
-		return
-	if battle.player_has_attacked:
-		return
-	#change to attack state	
-	player_state_machine.transition_to(player_state_machine.player_attacking)
-	
 
 func _try_move(grid_pos: Vector2i) -> void:
 	if battle.player_moves <= 0:
